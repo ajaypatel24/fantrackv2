@@ -3,9 +3,11 @@ package services
 import (
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"v3/api"
 	"v3/config"
 
@@ -41,7 +43,8 @@ type Category struct {
 func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
 
 	oauthClient := config.OAuthConfig.Client(context.Background(), token.(*oauth2.Token))
-	r, err := oauthClient.Get("https://fantasysports.yahooapis.com/fantasy/v2/league//teams/stats;type=week;week=20")
+	url := fmt.Sprintf("https://fantasysports.yahooapis.com/fantasy/v2/league/%s/teams/stats;type=week;week=20", os.Getenv("LEAGUE_KEY"))
+	r, err := oauthClient.Get(url)
 
 	if err != nil {
 		log.Fatal(err)
@@ -74,7 +77,8 @@ func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
 func (s *TeamCompareService) GetData(token any) []WinningMatchups {
 
 	oauthClient := config.OAuthConfig.Client(context.Background(), token.(*oauth2.Token))
-	r, err := oauthClient.Get("https://fantasysports.yahooapis.com/fantasy/v2/league/428.l.27608/teams/stats;type=week;week=20")
+	url := fmt.Sprintf("https://fantasysports.yahooapis.com/fantasy/v2/league/%s/teams/stats;type=week;week=20", os.Getenv("LEAGUE_KEY"))
+	r, err := oauthClient.Get(url)
 
 	if err != nil {
 		log.Fatal(err)

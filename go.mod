@@ -15,5 +15,6 @@ require (
 require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 )
