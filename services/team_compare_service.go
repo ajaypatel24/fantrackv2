@@ -29,7 +29,6 @@ func (s *TeamCompareService) GetWinningMatchupsLeague(token any) ([]api.Team, er
 }
 
 type WinningMatchups struct {
-	TeamName            string
 	WinningMatchupCount int
 	WinningMatchupTeams map[string]int
 }
@@ -38,6 +37,28 @@ type Category struct {
 	CategoryId       int
 	StatisticTeamMap map[string]float64
 	Average          float64
+}
+
+func (s *TeamCompareService) GetTeams(token any) []string {
+	oauthClient := config.OAuthConfig.Client(context.Background(), token.(*oauth2.Token))
+	url := fmt.Sprintf("https://fantasysports.yahooapis.com/fantasy/v2/league/%s/teams/", os.Getenv("LEAGUE_KEY"))
+	r, err := oauthClient.Get(url)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bytes, err := io.ReadAll(r.Body)
+
+	var l api.FantasyContent
+
+	err = xml.Unmarshal(bytes, &l)
+	var teamres []string
+	for _, team := range l.League.Teams {
+		teamres = append(teamres, team.Name)
+	}
+
+	return teamres
 }
 
 func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
@@ -74,7 +95,7 @@ func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
 	return res
 }
 
-func (s *TeamCompareService) GetData(token any) []WinningMatchups {
+func (s *TeamCompareService) GetData(token any) map[string]WinningMatchups {
 
 	oauthClient := config.OAuthConfig.Client(context.Background(), token.(*oauth2.Token))
 	url := fmt.Sprintf("https://fantasysports.yahooapis.com/fantasy/v2/league/%s/teams/stats;type=week;week=20", os.Getenv("LEAGUE_KEY"))
@@ -87,7 +108,7 @@ func (s *TeamCompareService) GetData(token any) []WinningMatchups {
 
 	var l api.FantasyContent
 	err = xml.Unmarshal(bytes, &l)
-	var m []WinningMatchups
+	m := make(map[string]WinningMatchups)
 	statLength := len(l.League.Teams[0].TeamStatistics[0].Stats)
 	for _, team := range l.League.Teams {
 		winningMatchupTeam := make(map[string]int)
@@ -118,12 +139,12 @@ func (s *TeamCompareService) GetData(token any) []WinningMatchups {
 			}
 			if winningStats >= 5 {
 				winningMatchupCount += 1
+				winningMatchupTeam[teamcomp.Name] = winningStats
 			}
-			winningMatchupTeam[teamcomp.Name] = winningStats
 
 		}
-		mu := WinningMatchups{TeamName: team.Name, WinningMatchupCount: winningMatchupCount, WinningMatchupTeams: winningMatchupTeam}
-		m = append(m, mu)
+		mu := WinningMatchups{WinningMatchupCount: winningMatchupCount, WinningMatchupTeams: winningMatchupTeam}
+		m[team.Name] = mu
 	}
 
 	log.Println(m)

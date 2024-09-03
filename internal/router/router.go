@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/cors"
 )
 
 func RouterSetup(oauthService *services.OAuthService, teamCompareService *services.TeamCompareService) http.Handler {
@@ -22,12 +23,17 @@ func RouterSetup(oauthService *services.OAuthService, teamCompareService *servic
 	r.Get("/login", oauthHandler.HandleYahooLogin)
 	r.Get("/callback", oauthHandler.HandleYahooCallback)
 
-	r.Get("/test", teamCompareHandler.GetWinners)
+	r.Get("/matchups", teamCompareHandler.GetWinners)
 
 	r.Get("/winners", teamCompareHandler.GetLeaders)
-
+	r.Get("/teams", teamCompareHandler.GetTeams)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowCredentials: true,
+	})
+	h := c.Handler(r)
 	//.Get("/de", teamCompareHandler.Te)
 
-	return r
+	return h
 
 }

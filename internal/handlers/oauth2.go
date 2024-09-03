@@ -63,8 +63,8 @@ func (h *OAuthHandler) HandleYahooCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//c, err := gc.GetAllTeamStats("428.l.27608", 1)
-	http.Redirect(w, r, "/test", http.StatusFound)
-	//fmt.Printf("%v", c)
+	//redirect to frontend AFTER callback saves sessions token to cookie
+	//replace localhost:5173 with wherever redirect needs to go for frontend
+	http.Redirect(w, r, "http://localhost:5173/", http.StatusFound)
 
 }
