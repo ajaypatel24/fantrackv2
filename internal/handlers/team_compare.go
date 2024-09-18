@@ -17,6 +17,22 @@ func NewTeamCompareHandler(teamCompareService *services.TeamCompareService) *Tea
 	return &TeamCompareHandler{}
 }
 
+func (h *TeamCompareHandler) GetCategoryMap(w http.ResponseWriter, r *http.Request) {
+	_, err := config.Store.Get(r, "auth-session")
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+
+	data := h.TeamCompareService.GetCategoryMap()
+
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, r, data)
+	return
+}
+
 func (h *TeamCompareHandler) GetTeams(w http.ResponseWriter, r *http.Request) {
 	store, err := config.Store.Get(r, "auth-session")
 

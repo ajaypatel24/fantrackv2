@@ -116,6 +116,18 @@ var YearKeys = map[string]string{
 	"2001": "57",
 }
 
+var CategoryKeys = map[int]string{
+	5:  "FG%",
+	8:  "FT%",
+	10: "3PTM",
+	12: "PTS",
+	15: "REB",
+	16: "AST",
+	17: "ST",
+	18: "BLK",
+	19: "TO",
+}
+
 //
 // Client
 //
@@ -257,24 +269,6 @@ type TeamStat struct {
 type StatCat struct {
 	StatId int    `xml:"stat_id"`
 	Value  string `xml:"value"`
-}
-
-func getStat(statId int) string {
-	statmap := map[int]string{
-		9004003: "",
-		5:       "",
-		9007006: "",
-		8:       "",
-		10:      "",
-		12:      "",
-		15:      "",
-		16:      "",
-		17:      "",
-		18:      "",
-		19:      "",
-	}
-
-	return statmap[statId]
 }
 
 // Settings describes how a league is configured
@@ -511,6 +505,10 @@ func (p *xmlContentProvider) Get(url string) (*FantasyContent, error) {
 	}
 
 	return fixContent(&content), nil
+}
+
+func GetCategoryMap() map[int]string {
+	return CategoryKeys
 }
 
 // fixContent updates the fantasy data with content that can't be unmarshalled

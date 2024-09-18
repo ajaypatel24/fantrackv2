@@ -17,12 +17,17 @@ export default function TemplateDemo() {
         {
             label: 'Home',
             icon: 'pi pi-home',
-            url: '/winner'
+            url: '/'
         },
         {
-            label: 'Features',
+            label: 'Team vs. Other Teams',
             icon: 'pi pi-star',
-            url: '/'
+            url: '/tester'
+        },
+        {
+            label: 'Leaders',
+            icon: 'pi pi-star',
+            url: '/leader'
         },
         {
             label: 'Projects',
@@ -87,7 +92,7 @@ export default function TemplateDemo() {
 
     return (
         <div className="card">
-            <Menubar model={items} start={start} end={end} />
+            <Menubar model={items} start={start} end={end} className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px=8"/>
         </div>
     )
 }

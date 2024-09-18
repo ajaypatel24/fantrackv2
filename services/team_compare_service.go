@@ -30,13 +30,18 @@ func (s *TeamCompareService) GetWinningMatchupsLeague(token any) ([]api.Team, er
 
 type WinningMatchups struct {
 	WinningMatchupCount int
-	WinningMatchupTeams map[string]int
+	Value               map[string]int
 }
 
 type Category struct {
-	CategoryId       int
-	StatisticTeamMap map[string]float64
-	Average          float64
+	Value   map[string]float64
+	Average float64
+}
+
+func (s *TeamCompareService) GetCategoryMap() map[int]string {
+	categoryMap := api.GetCategoryMap()
+
+	return categoryMap
 }
 
 func (s *TeamCompareService) GetTeams(token any) []string {
@@ -61,7 +66,7 @@ func (s *TeamCompareService) GetTeams(token any) []string {
 	return teamres
 }
 
-func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
+func (s *TeamCompareService) GetCategoryLeaders(token any) map[string]Category {
 
 	oauthClient := config.OAuthConfig.Client(context.Background(), token.(*oauth2.Token))
 	url := fmt.Sprintf("https://fantasysports.yahooapis.com/fantasy/v2/league/%s/teams/stats;type=week;week=20", os.Getenv("LEAGUE_KEY"))
@@ -72,27 +77,32 @@ func (s *TeamCompareService) GetCategoryLeaders(token any) []Category {
 	}
 	bytes, err := io.ReadAll(r.Body)
 
+	categoryMap := api.GetCategoryMap()
+
 	var l api.FantasyContent
 	err = xml.Unmarshal(bytes, &l)
-
+	m := make(map[string]Category)
 	statLength := len(l.League.Teams[0].TeamStatistics[0].Stats)
-	var res []Category
 	for index := range statLength {
 		StatisticMap := make(map[string]float64)
 		var CatId int
 		average := 0.0
+		CatId = l.League.Teams[0].TeamStatistics[0].Stats[index].StatId
+		categoryName, ok := categoryMap[CatId]
+		if !ok { //we are not tracking specific categories
+			continue
+		}
 		for _, team := range l.League.Teams {
 			floatValue := api.ConvertFractionToDecimal(team.TeamStatistics[0].Stats[index].Value)
 			average += floatValue
 			StatisticMap[team.Name] = floatValue
-			CatId = team.TeamStatistics[0].Stats[index].StatId
 		}
 		average /= float64(statLength)
-		c := Category{CategoryId: CatId, StatisticTeamMap: StatisticMap, Average: average}
-		res = append(res, c)
+		c := Category{Value: StatisticMap, Average: average}
+		m[categoryName] = c
 	}
 
-	return res
+	return m
 }
 
 func (s *TeamCompareService) GetData(token any) map[string]WinningMatchups {
@@ -143,7 +153,7 @@ func (s *TeamCompareService) GetData(token any) map[string]WinningMatchups {
 			}
 
 		}
-		mu := WinningMatchups{WinningMatchupCount: winningMatchupCount, WinningMatchupTeams: winningMatchupTeam}
+		mu := WinningMatchups{WinningMatchupCount: winningMatchupCount, Value: winningMatchupTeam}
 		m[team.Name] = mu
 	}
 

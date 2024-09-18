@@ -10,8 +10,16 @@ export const getWinners = async () => {
     return response.data
 }
 
-export const getdata = async () => {
+export const getLeaderData = async () => {
     const response = await axios.get(`http://localhost:8080/winners`, 
+        { withCredentials: true}
+    );
+
+    return response.data
+}
+
+export const getCategoryMap = async () => {
+    const response = await axios.get(`http://localhost:8080/category`,
         { withCredentials: true}
     );
 

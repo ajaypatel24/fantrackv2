@@ -27,6 +27,7 @@ func RouterSetup(oauthService *services.OAuthService, teamCompareService *servic
 
 	r.Get("/winners", teamCompareHandler.GetLeaders)
 	r.Get("/teams", teamCompareHandler.GetTeams)
+	r.Get("/category", teamCompareHandler.GetCategoryMap)
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowCredentials: true,
